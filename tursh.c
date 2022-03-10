@@ -1,18 +1,18 @@
+#include <stddef.h>
+
+#include "exec.h"
+
 int main() {
-  char *argv[3];
+  for (int i = 0; i < 1; i++) {
+    /* input */
 
-  do {
-    // input
-    if (tursh_input(argv) != 0) {
-      // Don't exec
+    /* build-in */
+
+    /* exec */
+    if (tursh_exec() != 0) {
       continue;
     }
-
-    // exec
-    if (tursh_exec(argv) != 0) {
-      continue;
-    }
-  } while (1);
+  };
 
   return 0;
 }

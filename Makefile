@@ -1,11 +1,11 @@
 TARGET = tursh
-CFLAGS = -I./include/ -Wall -Wextra -nostdinc -nostdlib -fno-builtin -fno-common
+CFLAGS = -I./include -Wall
 LDFLAGS = 
 
-SRCS = 
-SRCS_OBJ = $(SRCS:.c=.o) 
-HEADERS = $(SRCS:.c=.h)
 MAIN = tursh.c
+SRCS = exec.c
+SRCS_OBJ = $(SRCS:.c=.o) $(MAIN:.c=.o) 
+HEADERS = include/exec.h
 
 $(TARGET): $(SRCS_OBJ)
 	gcc -o $@ $+
@@ -13,8 +13,10 @@ $(TARGET): $(SRCS_OBJ)
 %.o: %.c
 	gcc $(CFLAGS) -c -o $@ $<
 
+run:
+	./$(TARGET)
 format:
-	clang-format -i $(MAIN)
+	clang-format -i $(MAIN) $(SRCS) $(HEADERS)
 
 clean:
 	rm -f *.o $(TARGET) $(SRCS_OBJ)
