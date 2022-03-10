@@ -3,9 +3,11 @@ CFLAGS = -I./include -Wall
 LDFLAGS = 
 
 MAIN = tursh.c
-SRCS = exec.c
+SRCS = exec.c \
+			 input.c
 SRCS_OBJ = $(SRCS:.c=.o) $(MAIN:.c=.o) 
-HEADERS = include/exec.h
+HEADERS = include/exec.h \
+					include/input.h
 
 $(TARGET): $(SRCS_OBJ)
 	gcc -o $@ $+

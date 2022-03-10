@@ -6,10 +6,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int tursh_exec() {
+int tursh_exec(char **argv) {
   int pid;
   int status;
-  char *argv[] = {"/usr/bin/ls", "-l", NULL};
 
   if ((pid = fork()) > 0) {
     /* Parent */
