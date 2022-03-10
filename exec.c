@@ -15,7 +15,7 @@ int tursh_exec(char **argv) {
     wait(&status);
   } else if (pid == 0) {
     /* Child */
-    if (execve(argv[0], argv, &argv[2]) == -1) {
+    if (execve(argv[0], argv, NULL) == -1) {
       perror("execve");
     }
     exit(1);

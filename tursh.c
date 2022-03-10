@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "exec.h"
 #include "input.h"
@@ -11,6 +12,10 @@ int main() {
 
     /* input */
     char **argv = tursh_input();
+    if (!argv) {
+      fprintf(stderr, "Cannot parse.\n");
+      exit(1);
+    }
 
     /* build-in */
 
