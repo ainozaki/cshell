@@ -20,7 +20,6 @@ char** tursh_input() {
   const char* delimiter = " \n";
   token = strtok(line, delimiter);
   if (!token) {
-    fprintf(stderr, "Cannot find any whitespace or nl.\n");
     return NULL;
   }
   argv[index++] = token;
