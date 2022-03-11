@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "builtin.h"
 #include "exec.h"
 #include "input.h"
 
@@ -17,7 +18,10 @@ int main() {
       continue;
     }
 
-    /* build-in */
+    /* built-in */
+    if (execute_builtin(argv) == 0) {
+      continue;
+    }
 
     /* exec */
     if (tursh_exec(argv) != 0) {

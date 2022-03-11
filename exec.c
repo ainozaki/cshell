@@ -8,7 +8,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "builtin.h"
 #include "signal_handle.h"
 
 #define PATH_TOKEN_MAX  32
@@ -52,8 +51,6 @@ int tursh_exec(char** argv) {
   char** envp = malloc(sizeof(char*) * 2);
   char* command_original = malloc(COMMAND_LEN_MAX);
 
-  execute_builtin_exit(argv);
-
   if ((pid = fork()) > 0) {
     /* Parent */
 
@@ -93,11 +90,6 @@ int tursh_exec(char** argv) {
     /* Set signal default */
     default_signal(SIGINT);
     default_signal(SIGTTOU);
-
-    /* built-in command */
-    if (execute_builtin(argv) == 0) {
-      exit(1);
-    }
 
     /* envp for execve() 3rd arg */
     envp[0] = get_envp_path();
