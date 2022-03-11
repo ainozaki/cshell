@@ -1,0 +1,11 @@
+BasedOnStyle: Chromium
+
+IndentWidth: 2
+
+Standard: Auto
+
+ColumnLimit: 80
+
+AllowShortBlocksOnASingleLine: Always
+AllowShortFunctionsOnASingleLine: Inline
+AlignConsecutiveMacros: true

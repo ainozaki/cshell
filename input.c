@@ -7,17 +7,17 @@
 
 #define TURSH_TOKEN_MAX 32
 
-char **tursh_input() {
+char** tursh_input() {
   char *line, *token;
   size_t readlen, len = 0;
   int index = 0;
-  char **argv = malloc(sizeof(char *) * TURSH_TOKEN_MAX);
+  char** argv = malloc(sizeof(char*) * TURSH_TOKEN_MAX);
 
   /* get stdin */
   readlen = getline(&line, &len, stdin);
 
   /* parse */
-  const char *delimiter = " \n";
+  const char* delimiter = " \n";
   token = strtok(line, delimiter);
   if (!token) {
     fprintf(stderr, "Cannot find any whitespace or nl.\n");
@@ -29,5 +29,6 @@ char **tursh_input() {
     token = strtok(NULL, delimiter);
     argv[index++] = token;
   }
+  argv[index] = NULL;
   return argv;
 }

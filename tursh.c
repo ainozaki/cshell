@@ -11,10 +11,10 @@ int main() {
     printf("tursh > ");
 
     /* input */
-    char **argv = tursh_input();
+    char** argv = tursh_input();
     if (!argv) {
       fprintf(stderr, "Cannot parse.\n");
-      exit(1);
+      continue;
     }
 
     /* build-in */
