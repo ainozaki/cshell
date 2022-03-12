@@ -2,14 +2,18 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "builtin.h"
 #include "exec.h"
 #include "input.h"
 
+#define CWD_SIZE_MAX 64
+
 int main() {
   do {
-    printf("tursh > ");
+    char* buf = malloc(CWD_SIZE_MAX);
+    printf("%s$ ", getcwd(buf, CWD_SIZE_MAX));
 
     /* input */
     char** argv = tursh_input();
