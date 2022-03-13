@@ -1,3 +1,5 @@
+#include "input.h"
+
 #include <errno.h>
 #include <input.h>
 #include <stddef.h>
@@ -30,4 +32,31 @@ char** tursh_input() {
   }
   argv[index] = NULL;
   return argv;
+}
+
+int get_argc(char* argv[]) {
+  int n = 0;
+  while (argv[n]) {
+    n++;
+    continue;
+  }
+  return n;
+}
+
+int search_argv(char* argv[], char* arg) {
+  for (int i = 0; i < get_argc(argv); i++) {
+    if (strcmp(argv[i], arg) == 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+void delete_argv(char* argv[], int pos, int n) {
+  int argc = get_argc(argv);
+
+  for (int i = pos + n; i < argc; i++) {
+    argv[i - n] = argv[i];
+  }
+  argv[argc - n] = NULL;
 }

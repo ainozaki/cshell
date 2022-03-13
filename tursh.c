@@ -13,7 +13,7 @@
 int main() {
   do {
     char* buf = malloc(CWD_SIZE_MAX);
-    printf("%s$ ", getcwd(buf, CWD_SIZE_MAX));
+    printf("\x1b[36m%s\x1b[39m$ ", getcwd(buf, CWD_SIZE_MAX));
 
     /* input */
     char** argv = tursh_input();

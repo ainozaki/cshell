@@ -1,6 +1,7 @@
 #include "exec.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,6 +9,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "input.h"
+#include "redirect.h"
 #include "signal_handle.h"
 
 #define PATH_TOKEN_MAX  32
@@ -98,6 +101,9 @@ int tursh_exec(char** argv) {
     /* env for execve() 1st arg */
     envs = get_env_list();
     command_original = argv[0];
+
+    /* Handle "<" */
+    do_redirect(argv);
 
     /* Try all PATH */
     int index = 0;
