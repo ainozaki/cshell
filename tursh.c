@@ -11,8 +11,8 @@
 #define CWD_SIZE_MAX 64
 
 int main() {
+  char* buf = malloc(CWD_SIZE_MAX);
   do {
-    char* buf = malloc(CWD_SIZE_MAX);
     printf("\x1b[36m%s\x1b[39m$ ", getcwd(buf, CWD_SIZE_MAX));
 
     /* input */
@@ -23,6 +23,9 @@ int main() {
     }
 
     /* built-in */
+    if (if_exit(argv) == 0) {
+      break;
+    }
     if (execute_builtin(argv) == 0) {
       continue;
     }
@@ -33,5 +36,6 @@ int main() {
     }
   } while (1);
 
+  free(buf);
   return 0;
 }
