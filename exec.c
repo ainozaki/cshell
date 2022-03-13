@@ -102,7 +102,7 @@ int tursh_exec(char** argv) {
     envs = get_env_list();
     command_original = argv[0];
 
-    /* Handle "<" */
+    /* Handle redirect */
     do_redirect(argv);
 
     /* Try all PATH */
