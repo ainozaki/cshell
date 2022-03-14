@@ -95,14 +95,15 @@ int tursh_exec(char** argv) {
       return 1;
     }
 
-    // dump_argv("argv", argv);
-    // dump_argv("exec", exec);
-    fprintf(stderr, "(in, out) = (%d, %d)   (in_op, out_op) = (%d, %d)\n",
-            in_fd, out_fd, in_fd_op, out_fd_op);
-
     /* fork */
     if ((pid = fork()) > 0) {
       /* Parent */
+      if (in_fd != 0) {
+        close(in_fd);
+      }
+      if (out_fd != 1) {
+        close(out_fd);
+      }
 
       /* Set child's pgid */
       if (setpgid(pid, pid) != 0) {
@@ -122,6 +123,11 @@ int tursh_exec(char** argv) {
 
       /* Wait for child */
       wait(&status);
+      if (!WIFEXITED(status)) {
+        printf("[%d]: child (%d) terminates or suspended unexpectedly\n",
+               getpid(), pid);
+        exit(1);
+      }
 
       /* Make foreground */
       if (tcsetpgrp(STDOUT_FILENO, getpgrp()) != 0) {
@@ -138,7 +144,6 @@ int tursh_exec(char** argv) {
         }
         close(in_fd);
         close(in_fd_op);
-        fprintf(stderr, "dup(%d, in)\n", in_fd);
       }
 
       if (out_fd != 1) {
@@ -148,7 +153,6 @@ int tursh_exec(char** argv) {
         }
         close(out_fd);
         close(out_fd_op);
-        fprintf(stderr, "dup(%d, out)\n", out_fd);
       }
 
       /* Set own pgid */
