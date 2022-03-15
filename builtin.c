@@ -7,6 +7,7 @@
 
 #define CWD_SIZE_MAX 64
 
+#include "argv.h"
 #include "input.h"
 
 static int do_cd(char** argv) {

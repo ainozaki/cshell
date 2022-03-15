@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include "argv.h"
 #include "input.h"
 
 void do_redirect(char* argv[]) {

@@ -23,6 +23,7 @@ int main() {
     }
 
     /* built-in */
+    /* TODO: move into exec */
     if (if_exit(argv) == 0) {
       break;
     }
@@ -32,6 +33,7 @@ int main() {
 
     /* exec */
     if (tursh_exec(argv) != 0) {
+      /* Error */
       continue;
     }
   } while (1);
