@@ -16,6 +16,9 @@
 #include "signal_handle.h"
 #include "utils.h"
 
+/* TODO: refactor */
+/* TODO: bg/fg command */
+
 int tursh_exec(char** argv) {
   int pid, status;
   char** envs = malloc(sizeof(char*) * PATH_TOKEN_MAX);
@@ -23,7 +26,7 @@ int tursh_exec(char** argv) {
   char** exec = malloc(sizeof(char*) * COMMAND_LEN_MAX);
   char* command_original = malloc(COMMAND_LEN_MAX);
 
-  bool pipe_exists = false;
+  bool pipe_exists = false; /* for next command */
   int pipefds[] = {-1, -1};
   int in_fd = 0;
   int out_fd = 1;
@@ -89,6 +92,7 @@ int tursh_exec(char** argv) {
       }
 
       /* Wait for child */
+			/* TODO: improve with waitpid */
       wait(&status);
       if (!WIFEXITED(status)) {
         printf("[%d]: child (%d) terminates or suspended unexpectedly\n",
@@ -164,6 +168,7 @@ int tursh_exec(char** argv) {
         }
       } while (1);
 
+			/*TODO: free argv element */
       free(envs);
       free(envp);
       free(exec);
