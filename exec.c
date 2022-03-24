@@ -18,7 +18,6 @@
 #include "signal_handle.h"
 #include "utils.h"
 
-/* TODO: refactor */
 /* TODO: bg/fg command */
 
 static void extract_next_command(char** exec, char** argv, int pipe_pos) {
@@ -36,6 +35,7 @@ static void extract_next_command(char** exec, char** argv, int pipe_pos) {
   }
 }
 
+/* Run execve() resolving PATH */
 static void tursh_execve(char** exec) {
   char** envs = malloc(sizeof(char*) * PATH_TOKEN_MAX);
   char** envp = malloc(sizeof(char*) * 2);
@@ -85,6 +85,7 @@ int tursh_exec(char** argv) {
   int pipefds[] = {0, 1};
   int prev_pipefds[] = {0, 1};
   int in_fd, out_fd;
+  int pgid = -1;
 
   while (argv[0]) {
     /* Pipe */
@@ -92,8 +93,6 @@ int tursh_exec(char** argv) {
     if (pipe_exists) {
       prev_pipefds[0] = pipefds[0];
       prev_pipefds[1] = pipefds[1];
-      pipefds[0] = 0;
-      pipefds[1] = 1;
     }
 
     int pipe_pos = search_argv(argv, "|");
@@ -102,6 +101,8 @@ int tursh_exec(char** argv) {
       pipe(pipefds);
     } else if (pipe_pos == -1) { /* No pipe */
       pipe_exists = false;
+      pipefds[0] = 0;
+      pipefds[1] = 1;
     } else if (pipe_pos == 0) {
       fprintf(stderr, "Unexpected | location.\n");
       return -1;
@@ -131,9 +132,11 @@ int tursh_exec(char** argv) {
       }
 
       /* Set child's pgid */
-      if (setpgid(pid, pid) != 0) {
-        perror("setpgid");
-        exit(1);
+      if (pgid == -1) {
+        pgid = pid;
+        setpgid(pid, pid);
+      } else {
+        setpgid(pid, pgid);
       }
 
       /* Ignore SIGINT & SIGTTOU */
@@ -147,13 +150,12 @@ int tursh_exec(char** argv) {
       }
 
       /* Wait for child */
-      /* TODO: improve with waitpid */
       wait(&status);
-      if (!WIFEXITED(status)) {
+      if (WIFSIGNALED(status) && WTERMSIG(status) != SIGINT) {
         printf(
-            "[%d]: child (%d) terminates or suspended unexpectedly [status: "
+            "[%d]: child (%d) terminates or suspended unexpectedly [signal: "
             "%d]\n",
-            getpid(), pid, status);
+            getpid(), pid, WTERMSIG(status));
         exit(1);
       }
 
@@ -184,9 +186,10 @@ int tursh_exec(char** argv) {
       }
 
       /* Set own pgid */
-      if (setpgid(getpid(), 0) != 0) {
-        perror("setpgid");
-        exit(1);
+      if (pgid == -1) {
+        setpgid(pid, pid);
+      } else {
+        setpgid(pid, pgid);
       }
 
       /* Set signal default */
