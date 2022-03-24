@@ -13,21 +13,13 @@
 int main() {
   char* buf = malloc(CWD_SIZE_MAX);
   do {
+    /* Show current working directory */
     printf("\x1b[36m%s\x1b[39m$ ", getcwd(buf, CWD_SIZE_MAX));
 
     /* input */
     char** argv = tursh_input();
     if (!argv) {
       fprintf(stderr, "Cannot parse.\n");
-      continue;
-    }
-
-    /* built-in */
-    /* TODO: move into exec */
-    if (if_exit(argv) == 0) {
-      break;
-    }
-    if (execute_builtin(argv) == 0) {
       continue;
     }
 

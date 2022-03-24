@@ -4,8 +4,8 @@
 int get_argc(char* argv[]);
 
 int search_argv(char* argv[], char* arg);
-void delete_argv(char* argv[], int pos, int n);
-void extract_argv(char* dst[], char* src[], int pos, int n);
+void delete_argv(char* argv[], int pos, int size);
+void extract_argv(char* dst[], char* src[], int pos, int size);
 
 void dump_argv(char* name, char** argv);
 

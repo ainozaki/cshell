@@ -21,19 +21,19 @@ int search_argv(char* argv[], char* arg) {
   return -1;
 }
 
-void delete_argv(char* argv[], int pos, int n) {
+void delete_argv(char* argv[], int pos, int size) {
   int argc = get_argc(argv);
-  for (int i = pos + n; i < argc; i++) {
-    argv[i - n] = argv[i];
+  for (int i = pos + size; i < argc; i++) {
+    argv[i - size] = argv[i];
   }
-  argv[argc - n] = NULL;
+  argv[argc - size] = NULL;
 }
 
-void extract_argv(char* dst[], char* src[], int pos, int n) {
-  for (int i = 0; i < n; i++) {
+void extract_argv(char* dst[], char* src[], int pos, int size) {
+  for (int i = 0; i < size; i++) {
     dst[i] = src[pos + i];
   }
-  dst[n] = NULL;
+  dst[size] = NULL;
 }
 
 void dump_argv(char* name, char** argv) {

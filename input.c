@@ -29,10 +29,12 @@ char** tursh_input() {
   }
   argv[index++] = token;
   while (token) {
-    /* strtok() expects NULL for 1st argument in 2nd run. */
-    token = strtok(NULL, delimiter);
+    token = strtok(
+        NULL,
+        delimiter); /* strtok() expects NULL for 1st argument in 2nd run. */
     argv[index++] = token;
   }
+
   /* Add NULL at the end of argv list. */
   argv[index] = NULL;
   return argv;
