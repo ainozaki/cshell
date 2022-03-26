@@ -78,6 +78,14 @@ static void tursh_execve(char** exec) {
   free(command_original);
 }
 
+static void set_fg(int pgrp) {
+  /* Make foreground */
+  if (tcsetpgrp(STDOUT_FILENO, pgrp) != 0) {
+    perror("tcsetpgrp");
+    exit(1);
+  }
+}
+
 int tursh_exec(char** argv) {
   int pid, status;
   char** exec = malloc(sizeof(char*) * COMMAND_LEN_MAX);
@@ -141,36 +149,34 @@ int tursh_exec(char** argv) {
       }
 
       /* Change forground pgid */
-      puts("parent");
-      printf("     pgid: %d\n", pgid);
-      printf("  getpgrp: %d\n", getpgrp());
-      printf("tcgetpgrp: %d\n", tcgetpgrp(0));
       set_fg(pgid);
 
       add_job(pid, pgid, exec);
 
       /* Wait for child */
-      wait(&status);
-      if (WIFSIGNALED(status)) {
-        set_fg();
-      }
-      if (WIFSIGNALED(status) && WTERMSIG(status) == SIGTSTP) {
-        set_fg();
-      }
-      if (WIFSIGNALED(status) && WTERMSIG(status) != SIGINT) {
+      waitpid(pid, &status, WUNTRACED | WCONTINUED);
+      if (WIFEXITED(status)) {
+        set_fg(getpgrp());
+        delete_job(pid);
+        continue;
+      } else if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) {
+        puts("detect SIGINT");
+        set_fg(getpgrp());
+        delete_job(pid);
+        continue;
+      } else if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTSTP) {
+        puts("detect SIGTSTP");
+        set_fg(getpgrp());
+        stop_job(pid);
+        continue;
+      } else if (WIFSIGNALED(status)) {
         printf(
             "[%d]: child (%d) terminates or suspended unexpectedly [signal: "
             "%d]\n",
             getpid(), pid, WTERMSIG(status));
         exit(1);
-      }
-
-      delete_job(pid);
-
-      /* Make foreground */
-      if (tcsetpgrp(STDOUT_FILENO, getpgrp()) != 0) {
-        perror("tcsetpgrp");
-        exit(1);
+      } else {
+        printf("Failed to exec some readon\n");
       }
     } else if (pid == 0) {
       /* Child */
@@ -202,12 +208,8 @@ int tursh_exec(char** argv) {
 
       /* Set signal default */
       default_signal(SIGINT);
+      default_signal(SIGTSTP);
       default_signal(SIGTTOU);
-
-      puts("child");
-      printf("     pgid: %d\n", pgid);
-      printf("  getpgrp: %d\n", getpgrp());
-      printf("tcgetpgrp: %d\n", tcgetpgrp(0));
 
       /* Exec built-in command */
       if (execute_builtin(exec) == 0) {

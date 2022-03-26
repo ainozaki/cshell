@@ -8,17 +8,18 @@ struct job {
   int pid;
   int pgid;
   enum job_state state;
-  char** command;
+  char* command;
   struct job* next;
   struct job* prev;
 };
 
 void add_job(int pid, int pgid, char** command);
 int delete_job(int pid);
+int stop_job(int pid);
 
 void show_jobs();
 void init_jobs();
 
-void set_fg(int pgid);
+extern struct job* jobs;
 
 #endif  // JOB_H_

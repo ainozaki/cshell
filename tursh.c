@@ -15,16 +15,16 @@
 
 int main() {
   char* buf = malloc(CWD_SIZE_MAX);
+  init_jobs();
+
   do {
     /* Show current working directory */
     printf("\x1b[36m%s\x1b[39m$ ", getcwd(buf, CWD_SIZE_MAX));
 
     /* Ignore SIGINT & SIGTTOU */
     ignore_signal(SIGINT);
+    ignore_signal(SIGTSTP);
     ignore_signal(SIGTTOU);
-    set_sigtstp_handler();
-
-    init_jobs();
 
     /* input */
     char** argv = tursh_input();
