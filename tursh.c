@@ -8,6 +8,7 @@
 #include "builtin.h"
 #include "exec.h"
 #include "input.h"
+#include "job.h"
 #include "signal_handle.h"
 
 #define CWD_SIZE_MAX 64
@@ -21,11 +22,13 @@ int main() {
     /* Ignore SIGINT & SIGTTOU */
     ignore_signal(SIGINT);
     ignore_signal(SIGTTOU);
+    set_sigtstp_handler();
+
+    init_jobs();
 
     /* input */
     char** argv = tursh_input();
     if (!argv) {
-      fprintf(stderr, "Cannot parse.\n");
       continue;
     }
 

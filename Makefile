@@ -7,6 +7,7 @@ SRCS = argv.c \
 			 builtin.c \
 			 exec.c \
 			 input.c \
+			 job.c \
 			 redirect.c \
 			 signal_handle.c \
 			 utils.c
@@ -16,6 +17,7 @@ HEADERS = include/argv.h \
 					include/builtin.h \
 					include/exec.h \
 					include/input.h \
+					include/job.h \
 					include/redirect.h \
 					include/signal_handle.h \
 					include/utils.h
@@ -28,6 +30,7 @@ $(TARGET): $(SRCS_OBJ)
 
 run:
 	./$(TARGET)
+
 format:
 	clang-format -i $(MAIN) $(SRCS) $(HEADERS)
 

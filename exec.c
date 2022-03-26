@@ -14,6 +14,7 @@
 #include "argv.h"
 #include "builtin.h"
 #include "input.h"
+#include "job.h"
 #include "redirect.h"
 #include "signal_handle.h"
 #include "utils.h"
@@ -139,18 +140,23 @@ int tursh_exec(char** argv) {
         setpgid(pid, pgid);
       }
 
-      /* Ignore SIGINT & SIGTTOU */
-      ignore_signal(SIGINT);
-      ignore_signal(SIGTTOU);
+      /* Change forground pgid */
+      puts("parent");
+      printf("     pgid: %d\n", pgid);
+      printf("  getpgrp: %d\n", getpgrp());
+      printf("tcgetpgrp: %d\n", tcgetpgrp(0));
+      set_fg(pgid);
 
-      /* Make backgrand */
-      if (tcsetpgrp(STDOUT_FILENO, pid) != 0) {
-        perror("tcsetpgrp");
-        exit(1);
-      }
+      add_job(pid, pgid, exec);
 
       /* Wait for child */
       wait(&status);
+      if (WIFSIGNALED(status)) {
+        set_fg();
+      }
+      if (WIFSIGNALED(status) && WTERMSIG(status) == SIGTSTP) {
+        set_fg();
+      }
       if (WIFSIGNALED(status) && WTERMSIG(status) != SIGINT) {
         printf(
             "[%d]: child (%d) terminates or suspended unexpectedly [signal: "
@@ -158,6 +164,8 @@ int tursh_exec(char** argv) {
             getpid(), pid, WTERMSIG(status));
         exit(1);
       }
+
+      delete_job(pid);
 
       /* Make foreground */
       if (tcsetpgrp(STDOUT_FILENO, getpgrp()) != 0) {
@@ -196,9 +204,14 @@ int tursh_exec(char** argv) {
       default_signal(SIGINT);
       default_signal(SIGTTOU);
 
+      puts("child");
+      printf("     pgid: %d\n", pgid);
+      printf("  getpgrp: %d\n", getpgrp());
+      printf("tcgetpgrp: %d\n", tcgetpgrp(0));
+
       /* Exec built-in command */
       if (execute_builtin(exec) == 0) {
-        continue;
+        exit(0);
       }
 
       /* Exec commands */

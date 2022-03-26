@@ -9,6 +9,7 @@
 
 #include "argv.h"
 #include "input.h"
+#include "job.h"
 
 static int do_cd(char** argv) {
   if (!argv[1]) {
@@ -43,6 +44,9 @@ int execute_builtin(char** argv) {
     return do_cd(argv);
   } else if (!strncmp(argv[0], "pwd", 4)) {
     return do_pwd(argv);
+  } else if (!strncmp(argv[0], "jobs", 5)) {
+    show_jobs();
+    return 0;
   } else {
     /* Not built-in command */
     return 1;

@@ -4,4 +4,6 @@
 void ignore_signal(int signal);
 void default_signal(int signal);
 
+void set_sigtstp_handler();
+
 #endif
