@@ -4,6 +4,4 @@
 /* return 0 if argv[0] is builtin command. */
 int execute_builtin(char** argv);
 
-int if_exit(char** argv);
-
 #endif  // BUILDIN_H_

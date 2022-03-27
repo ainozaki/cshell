@@ -115,10 +115,6 @@ int tursh_exec(char** argv) {
     if (!exec) {
       return -1;
     }
-    if (if_exit(exec) == 0) {
-      free(exec);
-      exit(0);
-    }
 
     /* fork */
     if ((pid = fork()) > 0) {
@@ -139,13 +135,14 @@ int tursh_exec(char** argv) {
         setpgid(pid, pgid);
       }
 
-      /* Change forground pgid */
-      set_fg(pgid);
-
       add_job(pid, pgid, exec);
 
       /* Wait for child */
+      set_fg(pgid);
+
       wait_child(pid);
+
+      set_fg(getpgrp());
 
     } else if (pid == 0) {
       /* Child */

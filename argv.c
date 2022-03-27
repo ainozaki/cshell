@@ -1,6 +1,7 @@
 #include "argv.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 int get_argc(char* argv[]) {
@@ -43,4 +44,14 @@ void dump_argv(char* name, char** argv) {
     printf("%s[%d] =  %s\n", name, i, argv[i]);
   }
   printf("---------------\n");
+}
+
+void free_argv(char** argv) {
+  if (argv) {
+    for (int i = 0; argv[i]; i++) {
+      printf("free %s\n", argv[i]);
+      free(argv[i]);
+    }
+    free(argv);
+  }
 }

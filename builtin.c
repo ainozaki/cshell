@@ -10,45 +10,40 @@
 #include "argv.h"
 #include "input.h"
 #include "job.h"
+#include "process.h"
 
-static int do_cd(char** argv) {
+static void do_cd(char** argv) {
   if (!argv[1]) {
     printf("usage: cd <path>\n");
-    return 0;
+    return;
   }
   if (chdir(argv[1]) != 0) {
     perror("cd");
-    return 0;
+    return;
   }
-  delete_argv(argv, 0, 2);
-  return 0;
 }
 
-static int do_pwd(char** argv) {
+static void do_pwd(char** argv) {
   char* buf = malloc(CWD_SIZE_MAX);
   printf("%s\n", getcwd(buf, CWD_SIZE_MAX));
   free(buf);
-  delete_argv(argv, 0, 1);
-  return 0;
-}
-
-int if_exit(char** argv) {
-  if (!strncmp(argv[0], "exit", 5)) {
-    return 0;
-  }
-  return 1;
 }
 
 int execute_builtin(char** argv) {
   if (!strncmp(argv[0], "cd", 3)) {
-    return do_cd(argv);
+    do_cd(argv);
+    return 0;
   } else if (!strncmp(argv[0], "pwd", 4)) {
-    return do_pwd(argv);
+    do_pwd(argv);
+    return 0;
   } else if (!strncmp(argv[0], "jobs", 5)) {
     show_jobs();
     return 0;
   } else if (!strncmp(argv[0], "fg", 3)) {
-    return do_fg(argv);
+    do_fg(argv);
+    return 0;
+  } else if (!strncmp(argv[0], "exit", 5)) {
+    exit(0);
   } else {
     /* Not built-in command */
     return 1;
