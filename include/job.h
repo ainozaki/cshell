@@ -22,4 +22,7 @@ void init_jobs();
 
 extern struct job* jobs;
 
+void set_fg(int pgrp);
+int do_fg(char** argv);
+
 #endif  // JOB_H_

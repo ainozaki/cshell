@@ -1,15 +1,30 @@
 #include "job.h"
 
+#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
-static struct job* current;
-static struct job* prev;
+#include "process.h"
+#include "signal_handle.h"
 
 static int jobid = 1;
 struct job* jobs; /* Head of the job list */
+
+void set_fg(int pgrp) {
+  ignore_signal(SIGTTOU);
+  ignore_signal(SIGTTIN);
+
+  /* Make foreground */
+  tcsetpgrp(STDOUT_FILENO, pgrp);
+
+  default_signal(SIGTTOU);
+  default_signal(SIGTTIN);
+}
 
 static int find_jobid_from_pgid(int pgid) {
   struct job* entry = jobs;
@@ -25,6 +40,38 @@ static int find_jobid_from_pgid(int pgid) {
   } while (entry != jobs);
 
   return -1;
+}
+
+static int find_pgid_from_jobid(int jobid) {
+  struct job* entry = jobs;
+
+  do {
+    if (!entry) {
+      break;
+    }
+    if (entry->jobid == jobid) {
+      return entry->pgid;
+    }
+    entry = entry->next;
+  } while (entry != jobs);
+
+  return -1;
+}
+
+static struct job* find_job_from_jobid(int jobid) {
+  struct job* entry = jobs;
+
+  do {
+    if (!entry) {
+      break;
+    }
+    if (entry->jobid == jobid) {
+      return entry;
+    }
+    entry = entry->next;
+  } while (entry != jobs);
+
+  return NULL;
 }
 
 static void job_state_to_string(enum job_state state, char* buff) {
@@ -115,4 +162,54 @@ void show_jobs() {
   }
 
   free(buff_state);
+}
+
+void wait_job(int pgid) {
+  int status;
+
+  printf("getpgid=%d, waiting-pgid=%d\n", getpgrp(), pgid);
+  waitpid(pgid, &status, WUNTRACED | WCONTINUED);
+  if (WIFEXITED(status)) {
+    set_fg(getpgrp());
+    delete_job(pgid);
+  } else if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) {
+    puts("detect SIGINT");
+    set_fg(getpgrp());
+    delete_job(pgid);
+  } else if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTSTP) {
+    puts("detect SIGTSTP");
+    set_fg(getpgrp());
+    stop_job(pgid);
+  } else if (WIFSIGNALED(status)) {
+    printf(
+        "[%d]: child (%d) terminates or suspended unexpectedly [signal: "
+        "%d]\n",
+        getpid(), pgid, WTERMSIG(status));
+    exit(1);
+  } else {
+    printf("Failed to exec some readon\n");
+  }
+}
+
+int do_fg(char** argv) {
+  struct job* fgjob;
+
+  if (argv[1]) {
+    int jid = strtol(argv[1], NULL, 10);
+    fgjob = find_job_from_jobid(jid);
+    if (!fgjob) {
+      fprintf(stderr, "Cannot find specified jobid %d.\n", jid);
+      return -1;
+    }
+  }
+
+  printf("set fg pgid[%d]\n", fgjob->pgid);
+  tcsetpgrp(STDOUT_FILENO, fgjob->pgid);
+
+  if (killpg(fgjob->pgid, SIGCONT) == -1) {
+    perror("killpg");
+  }
+
+  wait_child(fgjob->pid);
+  return 0;
 }

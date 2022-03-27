@@ -32,6 +32,11 @@ int main() {
       continue;
     }
 
+    /* Exec built-in command */
+    if (execute_builtin(argv) == 0) {
+      continue;
+    }
+
     /* exec */
     if (tursh_exec(argv) != 0) {
       /* Error */

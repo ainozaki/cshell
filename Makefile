@@ -8,6 +8,7 @@ SRCS = argv.c \
 			 exec.c \
 			 input.c \
 			 job.c \
+			 process.c \
 			 redirect.c \
 			 signal_handle.c \
 			 utils.c
@@ -18,6 +19,7 @@ HEADERS = include/argv.h \
 					include/exec.h \
 					include/input.h \
 					include/job.h \
+					include/process.h \
 					include/redirect.h \
 					include/signal_handle.h \
 					include/utils.h

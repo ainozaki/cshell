@@ -47,6 +47,8 @@ int execute_builtin(char** argv) {
   } else if (!strncmp(argv[0], "jobs", 5)) {
     show_jobs();
     return 0;
+  } else if (!strncmp(argv[0], "fg", 3)) {
+    return do_fg(argv);
   } else {
     /* Not built-in command */
     return 1;

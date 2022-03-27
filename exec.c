@@ -15,11 +15,10 @@
 #include "builtin.h"
 #include "input.h"
 #include "job.h"
+#include "process.h"
 #include "redirect.h"
 #include "signal_handle.h"
 #include "utils.h"
-
-/* TODO: bg/fg command */
 
 static void extract_next_command(char** exec, char** argv, int pipe_pos) {
   assert(pipe_pos != 0);
@@ -78,16 +77,8 @@ static void tursh_execve(char** exec) {
   free(command_original);
 }
 
-static void set_fg(int pgrp) {
-  /* Make foreground */
-  if (tcsetpgrp(STDOUT_FILENO, pgrp) != 0) {
-    perror("tcsetpgrp");
-    exit(1);
-  }
-}
-
 int tursh_exec(char** argv) {
-  int pid, status;
+  int pid;
   char** exec = malloc(sizeof(char*) * COMMAND_LEN_MAX);
 
   bool pipe_exists = false; /* for next command */
@@ -154,30 +145,8 @@ int tursh_exec(char** argv) {
       add_job(pid, pgid, exec);
 
       /* Wait for child */
-      waitpid(pid, &status, WUNTRACED | WCONTINUED);
-      if (WIFEXITED(status)) {
-        set_fg(getpgrp());
-        delete_job(pid);
-        continue;
-      } else if (WIFSIGNALED(status) && WTERMSIG(status) == SIGINT) {
-        puts("detect SIGINT");
-        set_fg(getpgrp());
-        delete_job(pid);
-        continue;
-      } else if (WIFSTOPPED(status) && WSTOPSIG(status) == SIGTSTP) {
-        puts("detect SIGTSTP");
-        set_fg(getpgrp());
-        stop_job(pid);
-        continue;
-      } else if (WIFSIGNALED(status)) {
-        printf(
-            "[%d]: child (%d) terminates or suspended unexpectedly [signal: "
-            "%d]\n",
-            getpid(), pid, WTERMSIG(status));
-        exit(1);
-      } else {
-        printf("Failed to exec some readon\n");
-      }
+      wait_child(pid);
+
     } else if (pid == 0) {
       /* Child */
       /* Update fds */
@@ -210,11 +179,6 @@ int tursh_exec(char** argv) {
       default_signal(SIGINT);
       default_signal(SIGTSTP);
       default_signal(SIGTTOU);
-
-      /* Exec built-in command */
-      if (execute_builtin(exec) == 0) {
-        exit(0);
-      }
 
       /* Exec commands */
       tursh_execve(exec);
