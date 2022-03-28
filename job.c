@@ -64,7 +64,7 @@ static char* command_to_string(char** command) {
   char* ret = buff;
   for (int i = 0; command[i]; i++) {
     strcpy(buff, command[i]);
-    buff += sizeof(command[i]);
+    buff += strlen(command[i]);
   }
   buff = 0;
   return ret;
@@ -162,4 +162,57 @@ void wait_job(int pgid) {
   } else {
     printf("Failed to exec some readon\n");
   }
+}
+
+void set_fg(int pgid) {
+  ignore_signal(SIGTTOU);
+  ignore_signal(SIGTTIN);
+  /* Make foreground */
+  if (tcsetpgrp(0, pgid) == -1) {
+    perror("tcsetpgrp");
+  }
+}
+
+void do_fg(char** argv) {
+  struct job* fgjob;
+
+  if (argv[1]) {
+    int jid = strtol(argv[1], NULL, 10);
+    fgjob = find_job_from_jobid(jid);
+    if (!fgjob) {
+      fprintf(stderr, "Cannot find specified jobid %d.\n", jid);
+      return;
+    }
+  } else {
+    /* TODO: save current job */
+    return;
+  }
+
+  if (killpg(fgjob->pgid, SIGCONT) == -1) {
+    perror("killpg");
+  }
+  set_fg(fgjob->pgid);
+  wait_child(fgjob->pid);
+  set_fg(getpgrp());
+}
+
+void do_bg(char** argv) {
+  struct job* fgjob;
+
+  if (argv[1]) {
+    int jid = strtol(argv[1], NULL, 10);
+    fgjob = find_job_from_jobid(jid);
+    if (!fgjob) {
+      fprintf(stderr, "Cannot find specified jobid %d.\n", jid);
+      return;
+    }
+  } else {
+    /* TODO: save current job */
+    return;
+  }
+
+  if (killpg(fgjob->pgid, SIGCONT) == -1) {
+    perror("killpg");
+  }
+  /* TODO: detect child process change */
 }

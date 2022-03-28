@@ -42,6 +42,9 @@ int execute_builtin(char** argv) {
   } else if (!strncmp(argv[0], "fg", 3)) {
     do_fg(argv);
     return 0;
+  } else if (!strncmp(argv[0], "bg", 3)) {
+    do_bg(argv);
+    return 0;
   } else if (!strncmp(argv[0], "exit", 5)) {
     exit(0);
   } else {
